@@ -42,6 +42,19 @@ Note Sorter needs Obsidian 1.10.0 or later. Until it is in the community plugin 
 2. In your vault, make the folder `.obsidian/plugins/note-sorter/` (the name must be `note-sorter`) and put the three files in it. `.obsidian` is hidden: press `Cmd+Shift+.` in the macOS Finder, or turn on *Hidden items* in the Windows Explorer.
 3. In **Settings → Community plugins**, turn off *Restricted mode* if needed, reload the list, and switch **Note Sorter** on.
 
+### Install from the terminal
+
+From your vault's root folder (macOS, Linux, or Git Bash on Windows):
+
+```sh
+mkdir -p .obsidian/plugins/note-sorter && cd .obsidian/plugins/note-sorter
+for f in main.js manifest.json styles.css; do
+  curl -fsSLO "https://github.com/kmu/obsidian-note-sorter/releases/latest/download/$f"
+done
+```
+
+Then switch the plugin on as in step 3. To update, run the same commands again and restart Obsidian (or switch the plugin off and on). Your notes are untouched; the plugin only keeps its own settings and move history.
+
 ## Development
 
 ```sh
