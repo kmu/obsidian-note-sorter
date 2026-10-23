@@ -22,6 +22,7 @@ export class FolderPickerModal extends Modal {
     private readonly plugin: NoteSorterPlugin,
     private readonly source: string,
     private readonly onChoose: (folder: string) => void,
+    private readonly placeholder: string = t("modal.placeholder"),
   ) {
     super(app);
     this.folders = allFolderPaths(app);
@@ -29,7 +30,7 @@ export class FolderPickerModal extends Modal {
 
   onOpen() {
     this.modalEl.addClass("ns-modal");
-    this.input = this.contentEl.createEl("input", { type: "text", cls: "ns-input", attr: { placeholder: t("modal.placeholder") } });
+    this.input = this.contentEl.createEl("input", { type: "text", cls: "ns-input", attr: { placeholder: this.placeholder } });
     this.listEl = this.contentEl.createDiv({ cls: "ns-list" });
     this.input.addEventListener("input", () => this.refresh());
     this.input.addEventListener("keydown", (e) => this.onKey(e));

@@ -5,6 +5,7 @@ import { recordMove } from "./history";
 import { folderOf, sortActiveNote } from "./moveFlow";
 import { NoteSorterSettingTab } from "./settingsTab";
 import { t } from "./t";
+import { TRIAGE_VIEW_TYPE, TriageView } from "./triageView";
 
 export default class NoteSorterPlugin extends Plugin {
   data: SavedData = parseSaved(null);
@@ -14,6 +15,12 @@ export default class NoteSorterPlugin extends Plugin {
   async onload() {
     this.data = parseSaved(await this.loadData());
     this.addSettingTab(new NoteSorterSettingTab(this));
+    this.registerView(TRIAGE_VIEW_TYPE, (leaf) => new TriageView(leaf, this));
+    this.addCommand({
+      id: "open-triage",
+      name: t("cmd.openTriage"),
+      callback: () => void this.openTriage(),
+    });
     this.addCommand({
       id: "sort-current",
       name: t("cmd.sortCurrent"),
@@ -30,6 +37,15 @@ export default class NoteSorterPlugin extends Plugin {
 
   onunload() {
     void this.saveData(this.data);
+  }
+
+  async openTriage() {
+    const existing = this.app.workspace.getLeavesOfType(TRIAGE_VIEW_TYPE)[0];
+    if (existing) {
+      await this.app.workspace.revealLeaf(existing);
+      return;
+    }
+    await this.app.workspace.getLeaf("tab").setViewState({ type: TRIAGE_VIEW_TYPE, active: true });
   }
 
   recordDestination(folder: string) {

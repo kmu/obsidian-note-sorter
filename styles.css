@@ -9,3 +9,22 @@
 .ns-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ns-empty { padding: 16px; color: var(--text-muted); text-align: center; }
 .ns-undo { margin-inline-start: 12px; }
+
+/* Triage view */
+.ns-triage { display: flex; flex-direction: column; height: 100%; padding: 0; }
+.ns-head, .ns-bar { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
+.ns-head { border-bottom: 1px solid var(--background-modifier-border); }
+.ns-source { flex: 1; font-weight: var(--font-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-count { color: var(--text-muted); font-size: var(--font-ui-small); }
+.ns-scroll { position: relative; flex: 1; overflow-y: auto; }
+.ns-spacer { width: 1px; }
+.ns-rows { position: absolute; top: 0; left: 0; right: 0; }
+.ns-trow { display: flex; align-items: center; gap: 12px; padding: 0 16px; box-sizing: border-box; cursor: pointer; border-bottom: 1px solid var(--background-modifier-border-hover); }
+.ns-trow:hover { background: var(--background-modifier-hover); }
+.ns-trow.is-selected { background: var(--background-modifier-active-hover); }
+.ns-ttext { flex: 1; min-width: 0; }
+.ns-ttitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-tpreview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); font-size: var(--font-ui-smaller); }
+.ns-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--background-modifier-border); background: var(--background-secondary); }
+.ns-chip { min-height: 40px; padding: 0 14px; border-radius: 20px; }
+.ns-chips.is-disabled .ns-chip:not(.ns-chip-more) { opacity: 0.4; pointer-events: none; }
