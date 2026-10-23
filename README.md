@@ -7,7 +7,7 @@ Works on desktop and mobile.
 ## Features
 
 - **Suggested folders.** The folders you move notes to most, and most recently, come first. Everything else is a few letters away.
-- **One tap or one key.** Tap a suggestion, or press its number (1–9). Type to search any folder; press Enter to move.
+- **One tap or one key.** Tap a suggestion, or press its number (1–9). If some folder name starts with a digit (a year, say), typing digits searches instead, and the number shortcut becomes Cmd/Ctrl plus the number. Type to search any folder; press Enter to move.
 - **New folders on the fly.** Type a name that does not exist and choose "Create folder … and move".
 - **Next note opens.** After a move, the next note in the same folder opens, in the order you choose (name, created, modified).
 - **Triage view.** List the notes of a folder, tick several (Shift-click selects a range), and tap a folder at the bottom to move them all.

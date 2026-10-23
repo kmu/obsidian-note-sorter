@@ -1,4 +1,4 @@
-import { Modal, type App } from "obsidian";
+import { Modal, Platform, type App } from "obsidian";
 import { digitShortcutsArePlain, filterFolders, validNewFolder } from "./folders";
 import { rankFolders } from "./history";
 import type NoteSorterPlugin from "./main";
@@ -8,6 +8,8 @@ import { t } from "./t";
 type Row = { path: string; create: boolean };
 const ROOT = "/";
 const TYPED_LIMIT = 50;
+/** Option+digit types a character on macOS, so the modifier shortcut is Cmd/Ctrl. */
+const MOD_LABEL = Platform.isMacOS ? "⌘" : "Ctrl+";
 
 /** A list of suggested folders with a search box; tap, press a digit, or type and press Enter. */
 export class FolderPickerModal extends Modal {
@@ -62,7 +64,7 @@ export class FolderPickerModal extends Modal {
     this.rows.forEach((row, i) => {
       const el = this.listEl.createDiv({ cls: "ns-row" });
       if (i === this.active) el.addClass("is-active");
-      if (i < 9 && (this.plainDigits ? showDigits : true)) el.createSpan({ cls: "ns-digit", text: this.plainDigits ? String(i + 1) : `⌥${i + 1}` });
+      if (i < 9 && (this.plainDigits ? showDigits : true)) el.createSpan({ cls: "ns-digit", text: this.plainDigits ? String(i + 1) : `${MOD_LABEL}${i + 1}` });
       const label = row.create ? t("modal.create", { folder: row.path }) : row.path === ROOT ? t("modal.root") : row.path;
       el.createSpan({ cls: "ns-name", text: label });
       el.addEventListener("click", () => this.choose(row));
@@ -71,13 +73,14 @@ export class FolderPickerModal extends Modal {
 
   private onKey(e: KeyboardEvent) {
     if (e.isComposing) return;
-    const alt = e.altKey ? /^Digit([1-9])$/.exec(e.code) : null;
+    const mod = e.metaKey || e.ctrlKey ? /^Digit([1-9])$/.exec(e.code) : null;
     const plain = this.plainDigits && this.input.value === "" && /^[1-9]$/.test(e.key) ? e.key : null;
-    const digit = alt?.[1] ?? plain;
+    const digit = mod?.[1] ?? plain;
     if (digit) {
       const row = this.rows[Number(digit) - 1];
       if (row) {
         e.preventDefault();
+        e.stopPropagation();
         this.choose(row);
       }
     } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
