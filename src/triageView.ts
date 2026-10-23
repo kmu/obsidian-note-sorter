@@ -1,14 +1,17 @@
-import { ItemView, TFile, TFolder, setIcon, type TAbstractFile, type WorkspaceLeaf } from "obsidian";
+import { ItemView, Platform, TFile, TFolder, setIcon, type TAbstractFile, type WorkspaceLeaf } from "obsidian";
 import { FolderPickerModal } from "./folderPicker";
+import { digitShortcutsArePlain } from "./folders";
 import { rankFolders } from "./history";
 import type NoteSorterPlugin from "./main";
 import { allFolderPaths, moveNotes } from "./moveFlow";
 import { sortSiblings } from "./next";
 import { t } from "./t";
+import { clampCursor, triageAction } from "./triageKeys";
 
 export const TRIAGE_VIEW_TYPE = "note-sorter-triage";
 
 const ROOT = "/";
+const MOD_LABEL = Platform.isMacOS ? "⌘" : "Ctrl+";
 const ROW_HEIGHT = 52;
 const BUFFER_ROWS = 8;
 /** A view in a background tab has no height; render enough rows for when it comes back. */
@@ -19,6 +22,9 @@ export class TriageView extends ItemView {
   private files: TFile[] = [];
   private selected = new Set<string>();
   private anchor = -1;
+  private cursor = 0;
+  private ranked: string[] = [];
+  private plainDigits = true;
   private previews = new Map<string, string>();
 
   private sourceEl!: HTMLElement;
@@ -58,6 +64,8 @@ export class TriageView extends ItemView {
     const { contentEl } = this;
     contentEl.empty();
     contentEl.addClass("ns-triage");
+    contentEl.tabIndex = 0;
+    contentEl.addEventListener("keydown", (e) => this.onKey(e));
 
     const head = contentEl.createDiv({ cls: "ns-head" });
     this.sourceEl = head.createSpan({ cls: "ns-source" });
@@ -91,6 +99,7 @@ export class TriageView extends ItemView {
 
     if (this.source === ROOT) this.source = this.plugin.data.settings.inboxFolder || this.app.workspace.getActiveFile()?.parent?.path || ROOT;
     this.reload();
+    this.contentEl.focus();
   }
 
   private setSource(folder: string) {
@@ -120,6 +129,7 @@ export class TriageView extends ItemView {
     );
     const byPath = new Map(notes.map((n) => [n.path, n]));
     this.files = sorted.map((s) => byPath.get(s.path)!);
+    this.cursor = clampCursor(this.cursor, this.files.length);
     for (const path of [...this.selected]) if (!byPath.has(path)) this.selected.delete(path);
     this.sourceEl.setText(t("triage.source", { folder: this.source === ROOT ? t("modal.root") : this.source }));
     this.renderChips();
@@ -160,6 +170,7 @@ export class TriageView extends ItemView {
     row.style.height = `${ROW_HEIGHT}px`;
     const on = this.selected.has(file.path);
     row.toggleClass("is-selected", on);
+    row.toggleClass("is-cursor", index === this.cursor);
     const box = row.createEl("input", { type: "checkbox", cls: "ns-check" });
     box.checked = on;
     const text = row.createDiv({ cls: "ns-ttext" });
@@ -206,17 +217,67 @@ export class TriageView extends ItemView {
     this.chipsEl.empty();
     const { settings, history } = this.plugin.data;
     const ranked = rankFolders(history, allFolderPaths(this.app), settings.excludeFolders, this.source, settings.candidateCount, Date.now());
-    for (const folder of ranked) {
-      const chip = this.chipsEl.createEl("button", { cls: "ns-chip", text: folder === ROOT ? t("modal.root") : folder });
+    this.ranked = ranked;
+    this.plainDigits = digitShortcutsArePlain(allFolderPaths(this.app));
+    ranked.forEach((folder, i) => {
+      const chip = this.chipsEl.createEl("button", { cls: "ns-chip" });
+      if (i < 9) chip.createSpan({ cls: "ns-digit", text: this.plainDigits ? String(i + 1) : `${MOD_LABEL}${i + 1}` });
+      chip.createSpan({ text: folder === ROOT ? t("modal.root") : folder });
       chip.addEventListener("click", () => void this.moveSelected(folder, false));
-    }
+    });
     this.chipsEl
       .createEl("button", { cls: "ns-chip ns-chip-more", text: t("triage.more") })
-      .addEventListener("click", () => new FolderPickerModal(this.app, this.plugin, this.source, (f, created) => void this.moveSelected(f, created)).open());
+      .addEventListener("click", () => this.pickMore());
+  }
+
+  private onKey(e: KeyboardEvent) {
+    if ((e.target as HTMLElement).closest("input, textarea, button")) return;
+    const action = triageAction(e, this.plainDigits);
+    if (!action || this.files.length === 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    if (action.kind === "step") {
+      if (action.extend && this.anchor < 0) this.anchor = this.cursor;
+      this.cursor = clampCursor(this.cursor + action.delta, this.files.length);
+      if (action.extend) {
+        const [a, b] = [Math.min(this.anchor, this.cursor), Math.max(this.anchor, this.cursor)];
+        for (let i = a; i <= b; i++) this.selected.add(this.files[i].path);
+      }
+      this.scrollToCursor();
+    } else if (action.kind === "toggle") {
+      const path = this.files[this.cursor].path;
+      if (this.selected.has(path)) this.selected.delete(path);
+      else this.selected.add(path);
+      this.anchor = this.cursor;
+    } else if (action.kind === "all") {
+      this.toggleAll();
+      return;
+    } else if (action.kind === "folder") {
+      const dest = this.ranked[action.n - 1];
+      if (dest !== undefined) void this.moveSelected(dest, false);
+      return;
+    } else {
+      this.pickMore();
+      return;
+    }
+    this.renderRows();
+    this.updateBar();
+  }
+
+  private scrollToCursor() {
+    const top = this.cursor * ROW_HEIGHT;
+    const height = this.scrollEl.clientHeight || FALLBACK_HEIGHT;
+    if (top < this.scrollEl.scrollTop) this.scrollEl.scrollTop = top;
+    else if (top + ROW_HEIGHT > this.scrollEl.scrollTop + height) this.scrollEl.scrollTop = top + ROW_HEIGHT - height;
+  }
+
+  private pickMore() {
+    new FolderPickerModal(this.app, this.plugin, this.source, (f, created) => void this.moveSelected(f, created)).open();
   }
 
   private async moveSelected(dest: string, create: boolean) {
     const files = this.files.filter((f) => this.selected.has(f.path));
+    if (files.length === 0 && this.files[this.cursor]) files.push(this.files[this.cursor]);
     if (files.length === 0) return;
     // Clear first: a second tap while the move runs must not move the same notes again.
     this.selected.clear();
@@ -224,6 +285,7 @@ export class TriageView extends ItemView {
     this.updateBar();
     await moveNotes(this.plugin, files, dest, { create, afterUndo: () => this.reload() });
     this.reload();
+    this.contentEl.focus();
   }
 
   onResize() {

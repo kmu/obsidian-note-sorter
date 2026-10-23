@@ -3,6 +3,8 @@ export type Locale = "en" | "ja";
 const en = {
   "cmd.sortCurrent": "Move current note to a folder",
   "cmd.openTriage": "Open triage view",
+  "cmd.undoLast": "Undo the last move",
+  "notice.nothingToUndo": "Nothing to undo.",
 
   "modal.placeholder": "Type a folder name…",
   "modal.create": "Create folder “{folder}” and move",
@@ -44,6 +46,8 @@ const en = {
 const ja: Record<keyof typeof en, string> = {
   "cmd.sortCurrent": "開いているノートをフォルダへ移動",
   "cmd.openTriage": "仕分けビューを開く",
+  "cmd.undoLast": "直前の移動を取り消す",
+  "notice.nothingToUndo": "取り消せる移動がありません。",
 
   "modal.placeholder": "フォルダ名を入力…",
   "modal.create": "フォルダ「{folder}」を作って移動",

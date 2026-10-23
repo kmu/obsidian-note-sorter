@@ -18,6 +18,14 @@ Works on desktop and mobile.
 
 - **One note:** open it, run the command **Move current note to a folder** (bind it to a hotkey in *Settings → Hotkeys*), then tap a suggestion or press its number.
 - **Many notes:** run **Open triage view**, tick notes, tap a folder chip.
+- **Undo:** the notice has an Undo button; the command **Undo the last move** does the same from the keyboard.
+
+### Keyboard only
+
+No hotkeys are bound by default. In *Settings → Hotkeys*, bind **Move current note to a folder**, **Open triage view** and **Undo the last move**. Then:
+
+- *One note:* hotkey, number, and the next note opens. Repeat.
+- *Triage view:* ↑/↓ move the cursor, Space ticks a note, Shift+↑/↓ ticks a range, Cmd/Ctrl+A ticks all, a number moves the ticked notes to that chip (the note under the cursor if none are ticked), Enter picks another folder. The number is Cmd/Ctrl plus the digit when a folder name starts with a digit.
 
 ## Settings
 

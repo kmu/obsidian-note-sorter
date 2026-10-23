@@ -28,3 +28,6 @@
 .ns-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--background-modifier-border); background: var(--background-secondary); }
 .ns-chip { min-height: 40px; padding: 0 14px; border-radius: 20px; }
 .ns-chips.is-disabled .ns-chip:not(.ns-chip-more) { opacity: 0.4; pointer-events: none; }
+.ns-trow.is-cursor { box-shadow: inset 2px 0 0 var(--interactive-accent); }
+.ns-triage:focus { outline: none; }
+.ns-chip .ns-digit { margin-right: 6px; opacity: 0.6; font-size: var(--font-ui-smaller); }

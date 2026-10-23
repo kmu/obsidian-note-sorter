@@ -66,14 +66,18 @@ export async function moveNotes(
   if (result.done.length > 0) {
     plugin.recordDestination(dest);
     const folderName = dest === ROOT ? t("modal.root") : dest;
-    noticeWithUndo(t("notice.moved", { count: result.done.length, folder: folderName }), () => {
+    const undo = () => {
+      if (plugin.lastUndo !== undo) return;
+      plugin.lastUndo = null;
       undoMoves(host, result.done)
         .then(() => {
           new Notice(t("notice.undone"));
           opts.afterUndo?.(result.done);
         })
         .catch((e: unknown) => new Notice(t("notice.undoFailed", { message: e instanceof Error ? e.message : String(e) })));
-    });
+    };
+    plugin.lastUndo = undo;
+    noticeWithUndo(t("notice.moved", { count: result.done.length, folder: folderName }), undo);
   }
   if (result.skipped.length > 0) {
     new Notice(t("notice.skipped", { count: result.skipped.length, names: describe(result.skipped.map((s) => s.from)) }));

@@ -22,6 +22,11 @@ export default class NoteSorterPlugin extends Plugin {
       callback: () => void this.openTriage(),
     });
     this.addCommand({
+      id: "undo-last-move",
+      name: t("cmd.undoLast"),
+      callback: () => (this.lastUndo ? this.lastUndo() : new Notice(t("notice.nothingToUndo"))),
+    });
+    this.addCommand({
       id: "sort-current",
       name: t("cmd.sortCurrent"),
       callback: () => {
@@ -47,6 +52,9 @@ export default class NoteSorterPlugin extends Plugin {
     }
     await this.app.workspace.getLeaf("tab").setViewState({ type: TRIAGE_VIEW_TYPE, active: true });
   }
+
+  /** Undoes the most recent move; cleared once used or replaced by a newer move. */
+  lastUndo: (() => void) | null = null;
 
   recordDestination(folder: string) {
     this.data.history = recordMove(this.data.history, folder, Date.now());
