@@ -1,0 +1,11 @@
+/* Folder picker */
+.ns-modal .modal-content { padding: 0; }
+.ns-input { width: 100%; box-sizing: border-box; border: 0; border-bottom: 1px solid var(--background-modifier-border); border-radius: 0; padding: 14px 16px; font-size: var(--font-ui-medium); background: transparent; }
+.ns-input:focus { box-shadow: none; }
+.ns-list { max-height: 60vh; overflow-y: auto; padding: 6px; }
+.ns-row { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 6px 12px; border-radius: var(--radius-m); cursor: pointer; }
+.ns-row:hover, .ns-row.is-active { background: var(--background-modifier-hover); }
+.ns-digit { flex: none; min-width: 1.6em; text-align: center; font-size: var(--font-ui-smaller); color: var(--text-muted); background: var(--background-secondary); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-s); padding: 0 4px; }
+.ns-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ns-empty { padding: 16px; color: var(--text-muted); text-align: center; }
+.ns-undo { margin-inline-start: 12px; }
