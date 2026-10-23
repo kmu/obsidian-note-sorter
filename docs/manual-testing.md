@@ -10,11 +10,11 @@ Logic (ranking, filtering, next note, move planning, translations, saved data) i
 
 ## One note
 
-- [ ] Command *Move current note to a folder* opens a list with a search box; with no history, folders are alphabetical.
-- [ ] Pressing `1` moves the note and opens the next note of the folder; the notice shows "Moved 1 to …".
-- [ ] Undo in the notice puts the note back and opens it.
+- [x] Command *Move current note to a folder* opens a list with a search box; with no history, folders are alphabetical.
+- [x] Pressing `1` moves the note and opens the next note of the folder; the notice shows "Moved 1 to …".
+- [x] Undo in the notice puts the note back and opens it.
 - [ ] Moving the last note opens the previous one; moving the only note opens nothing.
-- [ ] After a few moves, the most used folders come first.
+- [x] After a few moves, the most used folders come first.
 - [ ] Typing filters (spaces, Japanese, nested paths); Up/Down and Enter work.
 - [ ] Typing a new name shows "Create folder … and move" and creates it.
 - [ ] A note with the same name in the destination is not moved, and a notice says so.
@@ -24,10 +24,10 @@ Logic (ranking, filtering, next note, move planning, translations, saved data) i
 
 ## Triage view
 
-- [ ] *Open triage view* lists the notes of the chosen folder; the folder follows the setting or the open note.
-- [ ] Row tap toggles; Shift-click selects a range; *Select all* / *Select none* work; the count is right.
-- [ ] With nothing selected, folder chips are dimmed and do nothing.
-- [ ] A chip moves all selected notes; they leave the list; Undo brings them back.
+- [x] *Open triage view* lists the notes of the chosen folder; the folder follows the setting or the open note.
+- [x] Row tap toggles; Shift-click selects a range; *Select all* / *Select none* work; the count is right.
+- [x] With nothing selected, folder chips are dimmed and do nothing.
+- [x] A chip moves all selected notes; they leave the list; Undo brings them back.
 - [ ] *More…* opens the folder search; *Change* picks another source folder.
 - [ ] 2,000 notes: opens quickly and scrolls smoothly.
 - [ ] Creating or deleting a note in the folder updates the list.
@@ -43,3 +43,6 @@ Logic (ranking, filtering, next note, move planning, translations, saved data) i
 ## Open question
 
 - [ ] Does the desktop file explorer multi-select with Cmd/Ctrl-click? Record the answer in the README.
+
+Checked on macOS, Obsidian 1.14.5, 2026-10-23: the items ticked above (digit shortcut was verified as Cmd+number, since Option+number types a character and wrote one into the note).
+Not yet checked: last/only-note cases, typing and filtering, new-folder row, name collision, IME, mobile, 2,000-note triage, Japanese UI, and the explorer multi-select question.
