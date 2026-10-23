@@ -51,4 +51,6 @@ Not yet checked: last/only-note cases, typing and filtering, new-folder row, nam
 
 - [x] Triage view: Down and Space tick rows, Cmd+digit moves the ticked notes once, the cursor row moves when nothing is ticked.
 - [x] Command "Undo the last move" moves the batch back.
-- [ ] Shift+Up/Down range, Cmd+A, Enter picker, plain digits in a vault with no digit-leading folders, Windows/Linux Ctrl.
+- [x] Shift+Up/Down range, Cmd+A, Enter opens the picker, typing filters, the "Create folder" row makes the folder.
+- [x] Last note of the folder: moving it opens the previous note. Same-name collision: skipped with a notice, nothing overwritten.
+- [ ] Plain digits in a vault with no digit-leading folders, Windows/Linux Ctrl, Japanese UI, phone, a folder of thousands of notes.
