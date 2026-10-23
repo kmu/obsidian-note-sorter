@@ -1,4 +1,4 @@
-import { ItemView, Platform, TFile, TFolder, setIcon, type TAbstractFile, type WorkspaceLeaf } from "obsidian";
+import { ItemView, Platform, Scope, TFile, TFolder, setIcon, type TAbstractFile, type WorkspaceLeaf } from "obsidian";
 import { FolderPickerModal } from "./folderPicker";
 import { digitShortcutsArePlain } from "./folders";
 import { rankFolders } from "./history";
@@ -66,6 +66,14 @@ export class TriageView extends ItemView {
     contentEl.addClass("ns-triage");
     contentEl.tabIndex = 0;
     contentEl.addEventListener("keydown", (e) => this.onKey(e));
+    // Obsidian binds Cmd/Ctrl+digit itself (go to tab); the view's scope gets first say while it has focus.
+    this.scope = new Scope(this.app.scope);
+    for (let n = 1; n <= 9; n++) {
+      this.scope.register(["Mod"], String(n), () => {
+        this.moveToChip(n);
+        return false;
+      });
+    }
 
     const head = contentEl.createDiv({ cls: "ns-head" });
     this.sourceEl = head.createSpan({ cls: "ns-source" });
@@ -234,6 +242,7 @@ export class TriageView extends ItemView {
     if ((e.target as HTMLElement).closest("input, textarea, button")) return;
     const action = triageAction(e, this.plainDigits);
     if (!action || this.files.length === 0) return;
+    if (action.kind === "folder" && (e.metaKey || e.ctrlKey)) return; // handled by the scope above
     e.preventDefault();
     e.stopPropagation();
     if (action.kind === "step") {
@@ -253,8 +262,7 @@ export class TriageView extends ItemView {
       this.toggleAll();
       return;
     } else if (action.kind === "folder") {
-      const dest = this.ranked[action.n - 1];
-      if (dest !== undefined) void this.moveSelected(dest, false);
+      this.moveToChip(action.n);
       return;
     } else {
       this.pickMore();
@@ -262,6 +270,11 @@ export class TriageView extends ItemView {
     }
     this.renderRows();
     this.updateBar();
+  }
+
+  private moveToChip(n: number) {
+    const dest = this.ranked[n - 1];
+    if (dest !== undefined && this.files.length > 0) void this.moveSelected(dest, false);
   }
 
   private scrollToCursor() {

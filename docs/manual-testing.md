@@ -46,3 +46,9 @@ Logic (ranking, filtering, next note, move planning, translations, saved data) i
 
 Checked on macOS, Obsidian 1.14.5, 2026-10-23: the items ticked above (digit shortcut was verified as Cmd+number, since Option+number types a character and wrote one into the note).
 Not yet checked: last/only-note cases, typing and filtering, new-folder row, name collision, IME, mobile, 2,000-note triage, Japanese UI, and the explorer multi-select question.
+
+## Keyboard (checked on macOS, 1.14.5)
+
+- [x] Triage view: Down and Space tick rows, Cmd+digit moves the ticked notes once, the cursor row moves when nothing is ticked.
+- [x] Command "Undo the last move" moves the batch back.
+- [ ] Shift+Up/Down range, Cmd+A, Enter picker, plain digits in a vault with no digit-leading folders, Windows/Linux Ctrl.
