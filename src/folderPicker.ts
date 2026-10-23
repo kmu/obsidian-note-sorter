@@ -1,5 +1,5 @@
 import { Modal, type App } from "obsidian";
-import { filterFolders, validNewFolder } from "./folders";
+import { digitShortcutsArePlain, filterFolders, validNewFolder } from "./folders";
 import { rankFolders } from "./history";
 import type NoteSorterPlugin from "./main";
 import { allFolderPaths } from "./moveFlow";
@@ -16,16 +16,18 @@ export class FolderPickerModal extends Modal {
   private rows: Row[] = [];
   private active = 0;
   private readonly folders: string[];
+  private readonly plainDigits: boolean;
 
   constructor(
     app: App,
     private readonly plugin: NoteSorterPlugin,
     private readonly source: string,
-    private readonly onChoose: (folder: string) => void,
+    private readonly onChoose: (folder: string, created: boolean) => void,
     private readonly placeholder: string = t("modal.placeholder"),
   ) {
     super(app);
     this.folders = allFolderPaths(app);
+    this.plainDigits = digitShortcutsArePlain(this.folders);
   }
 
   onOpen() {
@@ -60,7 +62,7 @@ export class FolderPickerModal extends Modal {
     this.rows.forEach((row, i) => {
       const el = this.listEl.createDiv({ cls: "ns-row" });
       if (i === this.active) el.addClass("is-active");
-      if (showDigits && i < 9) el.createSpan({ cls: "ns-digit", text: String(i + 1) });
+      if (i < 9 && (this.plainDigits ? showDigits : true)) el.createSpan({ cls: "ns-digit", text: this.plainDigits ? String(i + 1) : `⌥${i + 1}` });
       const label = row.create ? t("modal.create", { folder: row.path }) : row.path === ROOT ? t("modal.root") : row.path;
       el.createSpan({ cls: "ns-name", text: label });
       el.addEventListener("click", () => this.choose(row));
@@ -69,8 +71,11 @@ export class FolderPickerModal extends Modal {
 
   private onKey(e: KeyboardEvent) {
     if (e.isComposing) return;
-    if (/^[1-9]$/.test(e.key) && this.input.value === "") {
-      const row = this.rows[Number(e.key) - 1];
+    const alt = e.altKey ? /^Digit([1-9])$/.exec(e.code) : null;
+    const plain = this.plainDigits && this.input.value === "" && /^[1-9]$/.test(e.key) ? e.key : null;
+    const digit = alt?.[1] ?? plain;
+    if (digit) {
+      const row = this.rows[Number(digit) - 1];
       if (row) {
         e.preventDefault();
         this.choose(row);
@@ -90,7 +95,7 @@ export class FolderPickerModal extends Modal {
 
   private choose(row: Row) {
     this.close();
-    this.onChoose(row.path);
+    this.onChoose(row.path, row.create);
   }
 
   onClose() {

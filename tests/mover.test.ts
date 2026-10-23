@@ -83,3 +83,24 @@ describe("undoMoves", () => {
     expect([...files].sort()).toEqual(["Inbox/a.md", "Inbox/b.md"]);
   });
 });
+
+describe("executeMoves when the folder cannot be created", () => {
+  it("reports every note as failed instead of throwing", async () => {
+    const { host } = fakeHost(["Inbox/a.md", "Inbox/b.md"]);
+    host.ensureFolder = async () => {
+      throw new Error("bad name");
+    };
+    const res = await executeMoves(host, planMoves([f("a.md"), f("b.md")], "x:y", new Set()), "x:y");
+    expect(res.done).toEqual([]);
+    expect(res.failed.map((x) => x.from)).toEqual(["Inbox/a.md", "Inbox/b.md"]);
+    expect(res.failed[0].message).toBe("bad name");
+  });
+});
+
+describe("planMoves case-insensitive collisions", () => {
+  it("skips a note that differs only in case from one at the destination", () => {
+    const plan = planMoves([f("note.md")], "Dest", new Set(["Dest/Note.md"]));
+    expect(plan.moves).toEqual([]);
+    expect(plan.skipped).toHaveLength(1);
+  });
+});

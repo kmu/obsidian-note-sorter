@@ -50,11 +50,16 @@ export async function moveNotes(
   plugin: NoteSorterPlugin,
   files: TFile[],
   dest: string,
-  afterUndo?: (moves: Move[]) => void,
+  opts: { create: boolean; afterUndo?: (moves: Move[]) => void },
 ): Promise<MoveResult> {
   const host = makeHost(plugin.app);
-  const join = (name: string) => (dest === ROOT ? name : `${dest}/${name}`);
-  const taken = new Set(files.map((f) => join(f.name)).filter((p) => host.exists(p)));
+  // A suggestion can outlive its folder; only the "Create" row may make one.
+  if (!opts.create && dest !== ROOT && !host.exists(dest)) {
+    new Notice(t("notice.folderGone", { folder: dest }));
+    return { done: [], skipped: [], failed: [] };
+  }
+  const folder = dest === ROOT ? plugin.app.vault.getRoot() : plugin.app.vault.getFolderByPath(dest);
+  const taken = new Set((folder?.children ?? []).map((c) => c.path));
   const plan = planMoves(files.map((f) => ({ path: f.path, name: f.name })), dest, taken);
   const result = await executeMoves(host, plan, dest);
 
@@ -65,7 +70,7 @@ export async function moveNotes(
       undoMoves(host, result.done)
         .then(() => {
           new Notice(t("notice.undone"));
-          afterUndo?.(result.done);
+          opts.afterUndo?.(result.done);
         })
         .catch((e: unknown) => new Notice(t("notice.undoFailed", { message: e instanceof Error ? e.message : String(e) })));
     });
@@ -87,11 +92,14 @@ export function siblingsOf(app: App, file: TFile): Sibling[] {
 }
 
 /** Move the open note to `dest`, then open the next note of its folder. */
-export async function sortActiveNote(plugin: NoteSorterPlugin, file: TFile, dest: string): Promise<void> {
+export async function sortActiveNote(plugin: NoteSorterPlugin, file: TFile, dest: string, create: boolean): Promise<void> {
   const nextPath = pickNext(siblingsOf(plugin.app, file), file.path, plugin.data.settings.sortKey);
-  const result = await moveNotes(plugin, [file], dest, (moves) => {
-    const back = plugin.app.vault.getAbstractFileByPath(moves[0].from);
-    if (back instanceof TFile) void plugin.app.workspace.getLeaf(false).openFile(back);
+  const result = await moveNotes(plugin, [file], dest, {
+    create,
+    afterUndo: (moves) => {
+      const back = plugin.app.vault.getAbstractFileByPath(moves[0].from);
+      if (back instanceof TFile) void plugin.app.workspace.getLeaf(false).openFile(back);
+    },
   });
   if (result.done.length === 0 || nextPath === null) return;
   const next = plugin.app.vault.getAbstractFileByPath(nextPath);

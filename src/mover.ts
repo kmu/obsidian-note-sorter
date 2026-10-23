@@ -36,7 +36,15 @@ export function planMoves(files: { path: string; name: string }[], dest: string,
 
 export async function executeMoves(host: MoveHost, plan: Plan, dest: string): Promise<MoveResult> {
   const result: MoveResult = { done: [], skipped: plan.skipped, failed: [] };
-  if (plan.moves.length > 0 && dest !== ROOT && !host.exists(dest)) await host.ensureFolder(dest);
+  if (plan.moves.length > 0 && dest !== ROOT && !host.exists(dest)) {
+    try {
+      await host.ensureFolder(dest);
+    } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
+      result.failed = plan.moves.map((m) => ({ from: m.from, message }));
+      return result;
+    }
+  }
   for (const move of plan.moves) {
     try {
       await host.rename(move.from, move.to);

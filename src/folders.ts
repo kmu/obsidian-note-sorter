@@ -24,7 +24,16 @@ export function validNewFolder(input: string, existing: string[]): string | null
   if (trimmed === "") return null;
   const parts = trimmed.split("/");
   if (parts.some((p) => p.trim() === "" || p === "." || p === "..")) return null;
+  if (/[\\:*?"<>|#^[\]]/.test(trimmed)) return null;
   const path = parts.map((p) => p.trim()).join("/");
   if (existing.some((e) => e.toLowerCase() === path.toLowerCase())) return null;
   return path;
+}
+
+/**
+ * Digits pick a suggestion only while nothing in the vault starts with a digit;
+ * otherwise typing a year (2024) would move the note on the first keystroke.
+ */
+export function digitShortcutsArePlain(folders: string[]): boolean {
+  return !folders.some((f) => /^\d/.test(f.slice(f.lastIndexOf("/") + 1)));
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterFolders, validNewFolder } from "../src/folders";
+import { digitShortcutsArePlain, filterFolders, validNewFolder } from "../src/folders";
 
 describe("filterFolders", () => {
   it("needs every token to appear in the path", () => {
@@ -37,5 +37,21 @@ describe("validNewFolder", () => {
     for (const bad of ["../x", "a/../b", "a//b", "", "  ", "/", "Notes", "notes/Old/"]) {
       expect(validNewFolder(bad, existing), bad).toBeNull();
     }
+  });
+});
+
+describe("validNewFolder forbidden characters", () => {
+  it("rejects characters Obsidian or the file system cannot take", () => {
+    for (const bad of ["a:b", "x?", "a*b", 'q"q', "a<b", "a>b", "a|b", "a\\b", "a#b", "a^b", "a[b", "a]b"]) {
+      expect(validNewFolder(bad, []), bad).toBeNull();
+    }
+  });
+});
+
+describe("digitShortcutsArePlain", () => {
+  it("is false when some folder name starts with a digit, so typing a year is not a shortcut", () => {
+    expect(digitShortcutsArePlain(["Projects/2024", "Archive"])).toBe(false);
+    expect(digitShortcutsArePlain(["Projects", "Archive/old", "資料/日本語"])).toBe(true);
+    expect(digitShortcutsArePlain(["2024"])).toBe(false);
   });
 });

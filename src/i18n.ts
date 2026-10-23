@@ -16,6 +16,7 @@ const en = {
   "notice.skipped": "Skipped {count} (same name exists there): {names}",
   "notice.failed": "Could not move {count}: {names}",
   "notice.noNote": "Open a note first",
+  "notice.folderGone": "The folder “{folder}” no longer exists",
 
   "triage.title": "Triage",
   "triage.source": "Folder: {folder}",
@@ -56,6 +57,7 @@ const ja: Record<keyof typeof en, string> = {
   "notice.skipped": "{count} 件は移動先に同じ名前があるため移していません: {names}",
   "notice.failed": "{count} 件を移動できませんでした: {names}",
   "notice.noNote": "先にノートを開いてください",
+  "notice.folderGone": "フォルダ「{folder}」はもうありません",
 
   "triage.title": "仕分け",
   "triage.source": "フォルダ: {folder}",

@@ -1,4 +1,4 @@
-import { ItemView, TFile, TFolder, setIcon, type WorkspaceLeaf } from "obsidian";
+import { ItemView, TFile, TFolder, setIcon, type TAbstractFile, type WorkspaceLeaf } from "obsidian";
 import { FolderPickerModal } from "./folderPicker";
 import { rankFolders } from "./history";
 import type NoteSorterPlugin from "./main";
@@ -11,6 +11,8 @@ export const TRIAGE_VIEW_TYPE = "note-sorter-triage";
 const ROOT = "/";
 const ROW_HEIGHT = 52;
 const BUFFER_ROWS = 8;
+/** A view in a background tab has no height; render enough rows for when it comes back. */
+const FALLBACK_HEIGHT = 1200;
 
 export class TriageView extends ItemView {
   private source = ROOT;
@@ -60,7 +62,7 @@ export class TriageView extends ItemView {
     const head = contentEl.createDiv({ cls: "ns-head" });
     this.sourceEl = head.createSpan({ cls: "ns-source" });
     head.createEl("button", { text: t("triage.change") }).addEventListener("click", () => {
-      new FolderPickerModal(this.app, this.plugin, "", (folder) => this.setSource(folder), t("triage.pickFolder")).open();
+      new FolderPickerModal(this.app, this.plugin, "", (folder, created) => !created && this.setSource(folder), t("triage.pickFolder")).open();
     });
 
     const bar = contentEl.createDiv({ cls: "ns-bar" });
@@ -72,15 +74,20 @@ export class TriageView extends ItemView {
     this.spacerEl = this.scrollEl.createDiv({ cls: "ns-spacer" });
     this.rowsEl = this.scrollEl.createDiv({ cls: "ns-rows" });
     this.scrollEl.addEventListener("scroll", () => this.renderRows());
-    this.registerDomEvent(window, "resize", () => this.renderRows());
 
     this.chipsEl = contentEl.createDiv({ cls: "ns-chips" });
 
-    const touchesSource = (path: string) => path.startsWith(this.source === ROOT ? "" : this.source + "/");
-    for (const name of ["create", "delete"] as const) {
-      this.registerEvent(this.app.vault.on(name as "create", (f) => touchesSource(f.path) && this.queueRefresh()));
-    }
-    this.registerEvent(this.app.vault.on("rename", (_f, old) => touchesSource(old) && this.queueRefresh()));
+    // Folders appearing or vanishing change the suggestions; notes under the source change the list.
+    const relevant = (f: TAbstractFile, ...paths: string[]) =>
+      f instanceof TFolder || [f.path, ...paths].some((p) => this.source === ROOT || p.startsWith(this.source + "/"));
+    this.registerEvent(this.app.vault.on("create", (f) => relevant(f) && this.queueRefresh()));
+    this.registerEvent(this.app.vault.on("delete", (f) => relevant(f) && this.queueRefresh()));
+    this.registerEvent(
+      this.app.vault.on("rename", (f, old) => {
+        if (old === this.source) this.source = f.path;
+        if (relevant(f, old)) this.queueRefresh();
+      }),
+    );
 
     if (this.source === ROOT) this.source = this.plugin.data.settings.inboxFolder || this.app.workspace.getActiveFile()?.parent?.path || ROOT;
     this.reload();
@@ -142,7 +149,7 @@ export class TriageView extends ItemView {
       return;
     }
     const first = Math.max(0, Math.floor(this.scrollEl.scrollTop / ROW_HEIGHT) - BUFFER_ROWS);
-    const last = Math.min(this.files.length, Math.ceil((this.scrollEl.scrollTop + this.scrollEl.clientHeight) / ROW_HEIGHT) + BUFFER_ROWS);
+    const last = Math.min(this.files.length, Math.ceil((this.scrollEl.scrollTop + (this.scrollEl.clientHeight || FALLBACK_HEIGHT)) / ROW_HEIGHT) + BUFFER_ROWS);
     this.rowsEl.style.transform = `translateY(${first * ROW_HEIGHT}px)`;
     for (let i = first; i < last; i++) this.renderRow(i);
   }
@@ -201,20 +208,26 @@ export class TriageView extends ItemView {
     const ranked = rankFolders(history, allFolderPaths(this.app), settings.excludeFolders, this.source, settings.candidateCount, Date.now());
     for (const folder of ranked) {
       const chip = this.chipsEl.createEl("button", { cls: "ns-chip", text: folder === ROOT ? t("modal.root") : folder });
-      chip.addEventListener("click", () => void this.moveSelected(folder));
+      chip.addEventListener("click", () => void this.moveSelected(folder, false));
     }
     this.chipsEl
       .createEl("button", { cls: "ns-chip ns-chip-more", text: t("triage.more") })
-      .addEventListener("click", () => new FolderPickerModal(this.app, this.plugin, this.source, (f) => void this.moveSelected(f)).open());
+      .addEventListener("click", () => new FolderPickerModal(this.app, this.plugin, this.source, (f, created) => void this.moveSelected(f, created)).open());
   }
 
-  private async moveSelected(dest: string) {
+  private async moveSelected(dest: string, create: boolean) {
     const files = this.files.filter((f) => this.selected.has(f.path));
     if (files.length === 0) return;
-    await moveNotes(this.plugin, files, dest, () => this.reload());
+    // Clear first: a second tap while the move runs must not move the same notes again.
     this.selected.clear();
     this.anchor = -1;
+    this.updateBar();
+    await moveNotes(this.plugin, files, dest, { create, afterUndo: () => this.reload() });
     this.reload();
+  }
+
+  onResize() {
+    this.renderRows();
   }
 
   async onClose() {

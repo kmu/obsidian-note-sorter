@@ -30,7 +30,7 @@ export default class NoteSorterPlugin extends Plugin {
           new Notice(t("notice.noNote"));
           return;
         }
-        new FolderPickerModal(this.app, this, folderOf(file), (dest) => void sortActiveNote(this, file, dest)).open();
+        new FolderPickerModal(this.app, this, folderOf(file), (dest, created) => void sortActiveNote(this, file, dest, created)).open();
       },
     });
   }
