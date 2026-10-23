@@ -1,0 +1,8 @@
+node_modules/
+main.js
+*.log
+.DS_Store
+
+# working notes (design docs, plans, spike notes); kept locally, not published
+.superpowers/
+docs/superpowers/

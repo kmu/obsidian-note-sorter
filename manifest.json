@@ -1,0 +1,10 @@
+{
+  "id": "note-sorter",
+  "name": "Note Sorter",
+  "version": "0.1.0",
+  "minAppVersion": "1.10.0",
+  "description": "Move notes to folders in one tap or a few keys, open the next note, and sort many notes at once.",
+  "author": "Koki Muraoka",
+  "isDesktopOnly": false,
+  "authorUrl": "https://github.com/kmu"
+}
