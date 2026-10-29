@@ -77,7 +77,7 @@ export async function moveNotes(
         .catch((e: unknown) => new Notice(t("notice.undoFailed", { message: e instanceof Error ? e.message : String(e) })));
     };
     plugin.lastUndo = undo;
-    noticeWithUndo(t("notice.moved", { count: result.done.length, folder: folderName }), undo);
+    if (plugin.data.settings.showMoveNotice) noticeWithUndo(t("notice.moved", { count: result.done.length, folder: folderName }), undo);
   }
   if (result.skipped.length > 0) {
     new Notice(t("notice.skipped", { count: result.skipped.length, names: describe(result.skipped.map((s) => s.from)) }));

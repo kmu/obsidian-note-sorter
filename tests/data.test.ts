@@ -28,3 +28,11 @@ describe("parseSaved", () => {
     expect(parseSaved({ settings: { sortKey: "bogus" } }).settings.sortKey).toBe("name");
   });
 });
+
+describe("showMoveNotice", () => {
+  it("is on by default and only a real boolean turns it off", () => {
+    expect(DEFAULT_SETTINGS.showMoveNotice).toBe(true);
+    expect(parseSaved({ settings: { showMoveNotice: false } }).settings.showMoveNotice).toBe(false);
+    expect(parseSaved({ settings: { showMoveNotice: "no" } }).settings.showMoveNotice).toBe(true);
+  });
+});

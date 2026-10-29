@@ -33,6 +33,7 @@ No hotkeys are bound by default. In *Settings → Hotkeys*, bind **Move current 
 - *Folders to leave out*: never suggested.
 - *Folder to sort*: the triage view's folder; empty means the folder of the open note.
 - *Order of notes*: decides which note opens next and the order in the triage view.
+- *Show a notice after moving*: turn it off if the notice gets in the way (on a phone, say); use the command *Undo the last move* instead.
 
 ## Install
 

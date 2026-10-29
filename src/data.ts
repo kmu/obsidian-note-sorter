@@ -6,10 +6,11 @@ export type Settings = {
   excludeFolders: string[];
   inboxFolder: string;
   sortKey: SortKey;
+  showMoveNotice: boolean;
 };
 export type SavedData = { settings: Settings; history: History };
 
-export const DEFAULT_SETTINGS: Settings = { candidateCount: 8, excludeFolders: [], inboxFolder: "", sortKey: "name" };
+export const DEFAULT_SETTINGS: Settings = { candidateCount: 8, excludeFolders: [], inboxFolder: "", sortKey: "name", showMoveNotice: true };
 
 const SORT_KEYS: SortKey[] = ["name", "created", "modified"];
 
@@ -27,6 +28,7 @@ export function parseSaved(raw: unknown): SavedData {
     excludeFolders: Array.isArray(s.excludeFolders) ? s.excludeFolders.filter((x): x is string => typeof x === "string") : [],
     inboxFolder: typeof s.inboxFolder === "string" ? s.inboxFolder : DEFAULT_SETTINGS.inboxFolder,
     sortKey: SORT_KEYS.find((k) => k === s.sortKey) ?? DEFAULT_SETTINGS.sortKey,
+    showMoveNotice: typeof s.showMoveNotice === "boolean" ? s.showMoveNotice : DEFAULT_SETTINGS.showMoveNotice,
   };
 
   const history: History = emptyHistory();

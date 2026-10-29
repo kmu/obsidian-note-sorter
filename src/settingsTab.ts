@@ -44,6 +44,16 @@ export class NoteSorterSettingTab extends PluginSettingTab {
       );
 
     new Setting(containerEl)
+      .setName(t("settings.moveNotice"))
+      .setDesc(t("settings.moveNoticeDesc"))
+      .addToggle((x) =>
+        x.setValue(settings.showMoveNotice).onChange((v) => {
+          settings.showMoveNotice = v;
+          this.plugin.requestSave();
+        }),
+      );
+
+    new Setting(containerEl)
       .setName(t("settings.sort"))
       .setDesc(t("settings.sortDesc"))
       .addDropdown((d) =>
