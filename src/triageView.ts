@@ -1,5 +1,6 @@
 import { ItemView, Platform, Scope, TFile, TFolder, setIcon, type TAbstractFile, type WorkspaceLeaf } from "obsidian";
 import { FolderPickerModal } from "./folderPicker";
+import { DeleteFolderModal, NewFolderModal } from "./folderTools";
 import { digitShortcutsArePlain } from "./folders";
 import { rankFolders } from "./history";
 import type NoteSorterPlugin from "./main";
@@ -85,6 +86,13 @@ export class TriageView extends ItemView {
     this.allBtn = bar.createEl("button", { text: t("triage.selectAll") });
     this.allBtn.addEventListener("click", () => this.toggleAll());
     this.countEl = bar.createSpan({ cls: "ns-count" });
+    const tools = bar.createDiv({ cls: "ns-tools" });
+    const add = tools.createEl("button", { cls: "clickable-icon", attr: { "aria-label": t("tools.newBtn") } });
+    setIcon(add, "folder-plus");
+    add.addEventListener("click", () => this.newFolder());
+    const del = tools.createEl("button", { cls: "clickable-icon", attr: { "aria-label": t("tools.deleteBtn") } });
+    setIcon(del, "folder-minus");
+    del.addEventListener("click", () => new DeleteFolderModal(this.app).open());
 
     this.scrollEl = contentEl.createDiv({ cls: "ns-scroll" });
     this.spacerEl = this.scrollEl.createDiv({ cls: "ns-spacer" });
@@ -282,6 +290,13 @@ export class TriageView extends ItemView {
     const height = this.scrollEl.clientHeight || FALLBACK_HEIGHT;
     if (top < this.scrollEl.scrollTop) this.scrollEl.scrollTop = top;
     else if (top + ROW_HEIGHT > this.scrollEl.scrollTop + height) this.scrollEl.scrollTop = top + ROW_HEIGHT - height;
+  }
+
+  private newFolder() {
+    new NewFolderModal(this.app, this.selected.size, (path, move) => {
+      if (move) void this.moveSelected(path, true);
+      else void this.app.vault.createFolder(path).then(() => this.reload());
+    }).open();
   }
 
   private pickMore() {

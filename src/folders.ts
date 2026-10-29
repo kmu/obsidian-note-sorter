@@ -37,3 +37,11 @@ export function validNewFolder(input: string, existing: string[]): string | null
 export function digitShortcutsArePlain(folders: string[]): boolean {
   return !folders.some((f) => /^\d/.test(f.slice(f.lastIndexOf("/") + 1)));
 }
+
+/** Folders that can be deleted without losing a note: empty ones, and never the vault root. */
+export function deletableFolders(folders: { path: string; childCount: number }[]): string[] {
+  return folders
+    .filter((f) => f.path !== "/" && f.childCount === 0)
+    .map((f) => f.path)
+    .sort((a, b) => a.localeCompare(b));
+}

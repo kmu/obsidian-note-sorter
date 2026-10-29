@@ -1,6 +1,7 @@
 import { Notice, Plugin, TFile, debounce } from "obsidian";
 import { parseSaved, type SavedData } from "./data";
 import { FolderPickerModal } from "./folderPicker";
+import { DeleteFolderModal, NewFolderModal } from "./folderTools";
 import { recordMove } from "./history";
 import { folderOf, sortActiveNote } from "./moveFlow";
 import { NoteSorterSettingTab } from "./settingsTab";
@@ -20,6 +21,16 @@ export default class NoteSorterPlugin extends Plugin {
       id: "open-triage",
       name: t("cmd.openTriage"),
       callback: () => void this.openTriage(),
+    });
+    this.addCommand({
+      id: "new-folder",
+      name: t("cmd.newFolder"),
+      callback: () => new NewFolderModal(this.app, 0, (path) => void this.app.vault.createFolder(path)).open(),
+    });
+    this.addCommand({
+      id: "delete-folder",
+      name: t("cmd.deleteFolder"),
+      callback: () => new DeleteFolderModal(this.app).open(),
     });
     this.addCommand({
       id: "undo-last-move",

@@ -31,3 +31,8 @@
 .ns-trow.is-cursor { box-shadow: inset 2px 0 0 var(--interactive-accent); }
 .ns-triage:focus { outline: none; }
 .ns-chip .ns-digit { margin-right: 6px; opacity: 0.6; font-size: var(--font-ui-smaller); }
+.ns-tools { margin-left: auto; display: flex; gap: 4px; }
+.ns-hint { color: var(--text-muted); font-size: var(--font-ui-smaller); margin: 6px 0 10px; }
+.ns-check-row { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; }
+.ns-buttons { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.ns-modal h3 { margin: 0 0 10px; }

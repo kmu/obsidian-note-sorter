@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { digitShortcutsArePlain, filterFolders, validNewFolder } from "../src/folders";
+import { deletableFolders, digitShortcutsArePlain, filterFolders, validNewFolder } from "../src/folders";
 
 describe("filterFolders", () => {
   it("needs every token to appear in the path", () => {
@@ -53,5 +53,18 @@ describe("digitShortcutsArePlain", () => {
     expect(digitShortcutsArePlain(["Projects/2024", "Archive"])).toBe(false);
     expect(digitShortcutsArePlain(["Projects", "Archive/old", "資料/日本語"])).toBe(true);
     expect(digitShortcutsArePlain(["2024"])).toBe(false);
+  });
+});
+
+describe("deletableFolders", () => {
+  it("offers only empty folders, never the vault root, in name order", () => {
+    const folders = [
+      { path: "/", childCount: 0 },
+      { path: "Zed", childCount: 0 },
+      { path: "Projects", childCount: 2 },
+      { path: "Archive", childCount: 0 },
+      { path: "Projects/Old", childCount: 0 },
+    ];
+    expect(deletableFolders(folders)).toEqual(["Archive", "Projects/Old", "Zed"]);
   });
 });
