@@ -6,3 +6,6 @@ main.js
 # working notes (design docs, plans, spike notes); kept locally, not published
 .superpowers/
 docs/superpowers/
+
+# per-vault plugin data written by Obsidian
+data.json
